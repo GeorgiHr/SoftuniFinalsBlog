@@ -56,12 +56,16 @@ namespace SoftuniFinalsBlog.Controllers
             }
         }
         //
-        //GET Article/Create
+        //GET: Article/Create
+        [Authorize]
         public ActionResult Create()
         {
             return View();
         }
+        //
+        //POST: Article/Create
         [HttpPost]
+        [Authorize]
         public ActionResult Create (Article article)
         {
             if (ModelState.IsValid)
@@ -99,6 +103,11 @@ namespace SoftuniFinalsBlog.Controllers
                     .Include(a => a.Author)
                     .First();
 
+                if (!IsUserAuthorizedToEdit(article))
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                }
+
                 if (article == null)
                 {
                     return HttpNotFound();
@@ -135,6 +144,70 @@ namespace SoftuniFinalsBlog.Controllers
 
                 return RedirectToAction("Index");
             }
+        }
+        //
+        //GET: Article/Edit
+        public ActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            using (var database = new BlogDbContext())
+            {
+                var article = database.Articles
+                    .Where(a => a.Id == id)
+                    .First();
+
+                if (!IsUserAuthorizedToEdit(article))
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                }
+
+
+                if (article == null)
+                {
+                    return HttpNotFound();
+                }
+
+                var model = new ArticleViewModel();
+                model.Id = article.Id;
+                model.Title = article.Title;
+                model.Content = article.Content;
+
+                return View(model);
+            }
+        }
+        //
+        //POST: Article/Edit
+        [HttpPost]
+        public ActionResult Edit (ArticleViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                using (var database = new BlogDbContext())
+                {
+                    var article = database.Articles
+                        .FirstOrDefault(a => a.Id == model.Id);
+
+                    article.Title = model.Title;
+                    article.Content = model.Content;
+
+                    database.Entry(article).State = EntityState.Modified;
+                    database.SaveChanges();
+
+                    return RedirectToAction("Index");
+                }
+            }
+            return View(model);
+        }
+        private bool IsUserAuthorizedToEdit(Article article)
+        {
+            bool isAdmin = this.User.IsInRole("Admin");
+            bool isAuthor = article.IsAuthor(this.User.Identity.Name);
+
+            return isAdmin || isAuthor;
         }
     }
 }
