@@ -26,10 +26,10 @@ namespace SoftuniFinalsBlog.Controllers
                 var articles = database.Articles
                     .Include(a => a.Author)
                     .ToList();
-                    
+
 
                 return View(articles);
-            } 
+            }
         }
         //
         // GET: Article/Details
@@ -53,6 +53,87 @@ namespace SoftuniFinalsBlog.Controllers
                 }
 
                 return View(article);
+            }
+        }
+        //
+        //GET Article/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult Create (Article article)
+        {
+            if (ModelState.IsValid)
+            {
+                using (var database = new BlogDbContext())
+                {
+                    var authorId = database.Users
+                        .Where(u => u.UserName == this.User.Identity.Name)
+                        .First()
+                        .Id;
+
+                    article.AuthorId = authorId;
+
+                    database.Articles.Add(article);
+                    database.SaveChanges();
+
+                    return RedirectToAction("Index");
+                }
+            }
+            return View(article);
+        }
+        //
+        //GET: Article/Delete
+        public ActionResult Delete(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            using (var database = new BlogDbContext())
+            {
+                var article = database.Articles
+                    .Where(a => a.Id == id)
+                    .Include(a => a.Author)
+                    .First();
+
+                if (article == null)
+                {
+                    return HttpNotFound();
+                }
+
+                return View(article);
+            }
+        }
+        //
+        //POST : Article/Delete
+        [HttpPost]
+        [ActionName("Delete")]
+        public ActionResult DeleteConfirmed(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            using (var database = new BlogDbContext())
+            {
+                var article = database.Articles
+                    .Where(a => a.Id == id)
+                    .Include(a => a.Author)
+                    .First();
+
+                if (article == null)
+                {
+                    return HttpNotFound();
+                }
+
+                database.Articles.Remove(article);
+                database.SaveChanges();
+
+                return RedirectToAction("Index");
             }
         }
     }
