@@ -12,6 +12,7 @@ using System.Web.Mvc;
 
 namespace SoftuniFinalsBlog.Controllers.Admin
 {
+    [Authorize(Roles ="Admin")]
     public class UserController : Controller
     {
         // GET: User
@@ -162,6 +163,59 @@ namespace SoftuniFinalsBlog.Controllers.Admin
                 {
                     userManager.RemoveFromRole(user.Id, role.Name);
                 }
+            }
+        }
+        //
+        //GET: User/Delete
+        public ActionResult Delete (string id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            using (var database = new BlogDbContext())
+            {
+                var user = database.Users
+                    .Where(u => u.Id.Equals(id))
+                    .First();
+
+                if (user == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(user);
+            }
+        }
+        //
+        //POST: User/Delete
+        [HttpPost]
+        [ActionName("Delete")]
+        public ActionResult DeleteConfirmed(string id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            using (var database = new BlogDbContext())
+            {
+                var user = database.Users
+                    .Where(u => u.Id.Equals(id))
+                    .First();
+
+                var userArticles = database.Articles
+                    .Where(a => a.Author.Id == user.Id);
+
+                foreach (var article in userArticles)
+                {
+                    database.Articles.Remove(article);
+                }
+
+                database.Users.Remove(user);
+
+                database.SaveChanges();
+                return RedirectToAction("List");
             }
         }
     }
