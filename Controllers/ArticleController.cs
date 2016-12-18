@@ -183,6 +183,10 @@ namespace SoftuniFinalsBlog.Controllers
                 model.Id = article.Id;
                 model.Title = article.Title;
                 model.Content = article.Content;
+                model.CategoryId = article.CategoryId;
+                model.Categories = database.Categories
+                    .OrderBy(c => c.Name)
+                    .ToList();
 
                 return View(model);
             }
@@ -201,6 +205,7 @@ namespace SoftuniFinalsBlog.Controllers
 
                     article.Title = model.Title;
                     article.Content = model.Content;
+                    article.CategoryId = model.CategoryId;
 
                     database.Entry(article).State = EntityState.Modified;
                     database.SaveChanges();
