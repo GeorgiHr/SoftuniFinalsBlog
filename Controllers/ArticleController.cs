@@ -25,6 +25,7 @@ namespace SoftuniFinalsBlog.Controllers
                 //Get articles from database
                 var articles = database.Articles
                     .Include(a => a.Author)
+                    .Include(a=>a.Tags)
                     .ToList();
 
 
@@ -46,6 +47,7 @@ namespace SoftuniFinalsBlog.Controllers
                 var article = database.Articles
                     .Where(a => a.Id == id)
                     .Include(a => a.Author)
+                    .Include(a=>a.Tags)
                     .First();
                 if (article == null)
                 {
@@ -87,6 +89,8 @@ namespace SoftuniFinalsBlog.Controllers
 
                     var article = new Article(authorId, model.Title, model.Content, model.CategoryId);
 
+                    this.SetArticleTags(article, model, database);
+
                     database.Articles.Add(article);
                     database.SaveChanges();
 
@@ -109,12 +113,15 @@ namespace SoftuniFinalsBlog.Controllers
                 var article = database.Articles
                     .Where(a => a.Id == id)
                     .Include(a => a.Author)
+                    .Include(a=> a.Category)
                     .First();
 
                 if (!IsUserAuthorizedToEdit(article))
                 {
                     return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
                 }
+
+                ViewBag.TagsString = string.Join(", ", article.Tags.Select(t => t.Name));
 
                 if (article == null)
                 {
@@ -146,6 +153,8 @@ namespace SoftuniFinalsBlog.Controllers
                 {
                     return HttpNotFound();
                 }
+
+               
 
                 database.Articles.Remove(article);
                 database.SaveChanges();
@@ -188,6 +197,8 @@ namespace SoftuniFinalsBlog.Controllers
                     .OrderBy(c => c.Name)
                     .ToList();
 
+                model.Tags = string.Join(", ", article.Tags.Select(t => t.Name));
+
                 return View(model);
             }
         }
@@ -206,6 +217,7 @@ namespace SoftuniFinalsBlog.Controllers
                     article.Title = model.Title;
                     article.Content = model.Content;
                     article.CategoryId = model.CategoryId;
+                    this.SetArticleTags(article, model, database);
 
                     database.Entry(article).State = EntityState.Modified;
                     database.SaveChanges();
@@ -215,6 +227,30 @@ namespace SoftuniFinalsBlog.Controllers
             }
             return View(model);
         }
+
+        private void SetArticleTags(Article article, ArticleViewModel model, BlogDbContext database)
+        {
+            var tagsStrings = model.Tags
+                .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.ToLower())
+                .Distinct();
+
+            article.Tags.Clear();
+
+            foreach (var tagString in tagsStrings)
+            {
+                Tag tag = database.Tags.FirstOrDefault(t => t.Name.Equals(tagString));
+
+                if (tag == null)
+                {
+                    tag = new Tag() { Name = tagString };
+                    database.Tags.Add(tag);
+                }
+
+                article.Tags.Add(tag);
+            }
+        }
+
         private bool IsUserAuthorizedToEdit(Article article)
         {
             bool isAdmin = this.User.IsInRole("Admin");
