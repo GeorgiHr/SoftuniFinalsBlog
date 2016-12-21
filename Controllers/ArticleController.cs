@@ -48,6 +48,7 @@ namespace SoftuniFinalsBlog.Controllers
                     .Where(a => a.Id == id)
                     .Include(a => a.Author)
                     .Include(a=>a.Tags)
+                    .Include(c=>c.Comments)
                     .First();
                 if (article == null)
                 {

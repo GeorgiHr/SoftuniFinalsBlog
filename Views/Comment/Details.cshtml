@@ -1,0 +1,47 @@
+﻿@model SoftuniFinalsBlog.Models.Comment
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h3>Comment</h3>
+    <hr />
+    <dl class="dl-horizontal">
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.VisitorsComment)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.VisitorsComment)
+        </dd>
+    </dl>
+</div>
+<p>
+    @if (User.IsInRole("Admin"))
+    {
+
+        @Html.ActionLink("Edit", "Edit", "Comment", new { @id = Model.Id }, new { @class = "btn btn-success btn-xs" })
+        @Html.ActionLink("Delete", "Delete", "Comment", new { @id = Model.Id }, new { @class = "btn btn-danger btn-xs" })
+    }
+    @Html.ActionLink("Back to comments", "Index")
+</p>

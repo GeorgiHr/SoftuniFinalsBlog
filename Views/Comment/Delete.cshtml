@@ -1,0 +1,49 @@
+﻿@model SoftuniFinalsBlog.Models.Comment
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+
+<h3>After you delete a comment the changes cannot be reverted!</h3>
+<h4>Are you sure you want to delete it?</h4>
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.VisitorsComment)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.VisitorsComment)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions radio-inline">
+            <input type="submit" value="Yes, delete it!" class="btn btn-default" /> |
+            @Html.ActionLink("No, go back to article comments", "List", new { id = Model.Id })
+        </div>
+    }
+</div>

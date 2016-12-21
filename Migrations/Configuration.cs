@@ -12,7 +12,6 @@ namespace SoftuniFinalsBlog.Migrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
-            AutomaticMigrationDataLossAllowed = true;
             ContextKey = "SoftuniFinalsBlog.Models.BlogDbContext";
         }
 

@@ -11,9 +11,12 @@ namespace SoftuniFinalsBlog.Models
     {
         private ICollection<Tag> tags;
 
+        private ICollection<Comment> comments;
+
         public Article()
         {
             this.tags = new HashSet<Tag>();
+            this.comments = new HashSet<Comment>();
         }
 
         public Article(string authorId, string title, string content, int categoryId)
@@ -23,6 +26,7 @@ namespace SoftuniFinalsBlog.Models
             this.Content = content;
             this.CategoryId = categoryId;
             this.tags = new HashSet<Tag>();
+            this.comments = new HashSet<Comment>();
         }
 
         [ForeignKey("Category")]
@@ -53,6 +57,12 @@ namespace SoftuniFinalsBlog.Models
         {
             get { return this.tags; }
             set { this.tags = value; }
+        }
+
+        public virtual ICollection<Comment> Comments
+        {
+            get { return this.comments; }
+            set { this.comments = value; }
         }
     }
 }
